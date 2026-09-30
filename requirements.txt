@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+python-multipart
+numpy
+scipy
+librosa
+soundfile
+torch
+transformers
+accelerate
+pytest
+httpx
+websockets
+onnx
+onnxruntime
+onnxscript

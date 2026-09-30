@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VocalGuard AI V2 — Real-Time Voice Cloning Detection & Forensic Prevention</title>
+  <style>
+    :root {
+      --bg: #070b14;
+      --card-bg: #0f172a;
+      --card-border: #1e293b;
+      --card-hover: #1e2942;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.3);
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --orange: #f97316;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .container { max-width: 1320px; margin: 0 auto; }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-logo {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: linear-gradient(135deg, #06b6d4, #3b82f6);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 22px; color: #fff;
+      box-shadow: 0 0 20px var(--cyan-glow);
+    }
+    .brand-title h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-title p { font-size: 13px; color: var(--text-muted); }
+    
+    .header-badges { display: flex; align-items: center; gap: 10px; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; color: var(--green);
+    }
+    .status-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); }
+    .status-dot.pulsing { animation: pulseDot 1.2s infinite; }
+    @keyframes pulseDot { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.3); } 100% { opacity: 1; transform: scale(1); } }
+
+    /* Honesty Banner */
+    .honesty-banner {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-left: 4px solid var(--yellow);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 12.5px;
+      color: #fde68a;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .honesty-banner strong { color: #fff; }
+
+    /* Grid Layouts */
+    .grid-main {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 1024px) {
+      .grid-main { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+    }
+    .card-title {
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 14px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab-btn {
+      flex: 1; padding: 10px; background: #1e293b; border: 1px solid var(--card-border);
+      color: var(--text-muted); border-radius: 8px; font-weight: 600; font-size: 13px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--cyan); color: #000; border-color: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan-glow); font-weight: 700;
+    }
+
+    /* Live Mic Controls */
+    .mic-controls { display: flex; flex-direction: column; gap: 12px; }
+    .btn-mic {
+      padding: 14px; border-radius: 8px; border: none; font-weight: 800;
+      font-size: 14px; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; gap: 10px; transition: 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .btn-mic.idle { background: var(--cyan); color: #000; box-shadow: 0 0 15px var(--cyan-glow); }
+    .btn-mic.recording { background: var(--red); color: #fff; animation: pulseRed 1.4s infinite; }
+    @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
+    .btn-action {
+      padding: 9px 14px; border-radius: 6px; background: #1e293b; border: 1px solid #334155;
+      color: #38bdf8; font-weight: 600; font-size: 12px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; gap: 6px; transition: 0.15s;
+    }
+    .btn-action:hover { background: #293548; color: #fff; border-color: #475569; }
+
+    /* VU Level Meter */
+    .vu-meter-row {
+      display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text-muted);
+    }
+    .vu-track {
+      flex: 1; height: 8px; background: #0b0f19; border-radius: 4px; overflow: hidden; border: 1px solid var(--card-border);
+    }
+    .vu-fill {
+      height: 100%; width: 0%; background: linear-gradient(90deg, #10b981 60%, #f59e0b 85%, #ef4444 100%);
+      transition: width 0.04s ease;
+    }
+    .vu-db-text { width: 50px; font-family: var(--font-mono); text-align: right; font-size: 11px; }
+
+    .config-row {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 12px; color: var(--text-muted); gap: 10px;
+    }
+    .config-row select {
+      background: #1e293b; border: 1px solid var(--card-border); color: #fff;
+      padding: 5px 8px; border-radius: 6px; font-size: 12px;
+    }
+
+    /* Live States Banner & Gauge */
+    .state-banner-container {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 16px; border-radius: 10px; background: #0b1120;
+      border: 1px solid var(--card-border); margin-bottom: 16px;
+    }
+    .live-state-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 20px; border-radius: 9999px; font-size: 14px;
+      font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .state-initializing { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid #475569; }
+    .state-analyzing { background: rgba(6, 182, 212, 0.15); color: var(--cyan); border: 1px solid var(--cyan); }
+    .state-low_risk { background: rgba(16, 185, 129, 0.15); color: var(--green); border: 1px solid var(--green); box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
+    .state-suspicious { background: rgba(245, 158, 11, 0.15); color: var(--yellow); border: 1px solid var(--yellow); box-shadow: 0 0 12px rgba(245, 158, 11, 0.25); }
+    .state-high_risk { background: rgba(239, 68, 68, 0.2); color: var(--red); border: 1px solid var(--red); box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); animation: pulseRisk 1.5s infinite; }
+    .state-inconclusive { background: rgba(139, 92, 246, 0.15); color: var(--purple); border: 1px solid var(--purple); }
+    @keyframes pulseRisk { 0% { opacity: 1; } 50% { opacity: 0.75; } 100% { opacity: 1; } }
+
+    /* Policy Action Pill */
+    .policy-pill {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 4px; letter-spacing: 0.5px;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .policy-allow { background: rgba(16, 185, 129, 0.2); color: var(--green); border: 1px solid var(--green); }
+    .policy-monitor { background: rgba(6, 182, 212, 0.2); color: var(--cyan); border: 1px solid var(--cyan); }
+    .policy-warn_verify { background: rgba(245, 158, 11, 0.2); color: var(--yellow); border: 1px solid var(--yellow); }
+    .policy-escalate { background: rgba(249, 115, 22, 0.2); color: var(--orange); border: 1px solid var(--orange); }
+    .policy-block_simulation { background: rgba(239, 68, 68, 0.2); color: var(--red); border: 1px solid var(--red); }
+    .policy-audit_quality { background: rgba(139, 92, 246, 0.2); color: var(--purple); border: 1px solid var(--purple); }
+
+    /* Risk Score Gauge */
+    .gauge-wrapper {
+      position: relative; width: 170px; height: 170px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .gauge-circle { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .gauge-circle circle {
+      fill: none; stroke-width: 14; stroke-linecap: round;
+      transition: stroke-dashoffset 0.35s ease, stroke 0.35s ease;
+    }
+    .gauge-bg { stroke: #1e293b; }
+    .gauge-val { stroke: var(--cyan); stroke-dasharray: 440; stroke-dashoffset: 440; }
+    .gauge-content {
+      position: absolute; display: flex; flex-direction: column; align-items: center;
+    }
+    .gauge-score { font-size: 36px; font-weight: 800; font-family: var(--font-mono); }
+    .gauge-caption { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Timeline Canvas */
+    .timeline-container { position: relative; margin-bottom: 16px; }
+    .timeline-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 6px; font-size: 12px; color: var(--text-muted);
+    }
+    canvas#timelineCanvas {
+      width: 100%; height: 130px; border-radius: 8px;
+      background: #090e17; border: 1px solid var(--card-border);
+      display: block;
+    }
+    canvas#waveformCanvas {
+      width: 100%; height: 60px; border-radius: 6px;
+      background: #090e17; border: 1px solid var(--card-border);
+      display: block; margin-top: 10px;
+    }
+
+    /* Event Log Terminal */
+    .event-log-box {
+      height: 150px; overflow-y: auto; background: #070b12;
+      border: 1px solid var(--card-border); border-radius: 8px;
+      padding: 10px; font-family: var(--font-mono); font-size: 11px;
+    }
+    .event-log-entry {
+      padding: 3px 0; border-bottom: 1px solid #111a2e; display: flex; gap: 8px;
+      align-items: baseline;
+    }
+    .event-log-entry:last-child { border-bottom: none; }
+    .log-time { color: var(--text-muted); min-width: 50px; }
+    .log-msg { color: #e2e8f0; word-break: break-all; }
+    .log-msg.warn { color: var(--yellow); }
+    .log-msg.alert { color: var(--red); font-weight: bold; }
+    .log-msg.success { color: var(--green); }
+    .log-msg.info { color: var(--cyan); }
+
+    /* Telemetry & Metrics Grid */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px; margin-top: 12px;
+    }
+    .stat-card {
+      background: #0b1120; border: 1px solid var(--card-border);
+      border-radius: 8px; padding: 10px;
+    }
+    .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+    .stat-val { font-size: 16px; font-weight: 700; font-family: var(--font-mono); color: #fff; margin-top: 2px; }
+
+    /* "Why This Result?" Drawer */
+    .drawer {
+      display: none; background: #0b1222; border: 1px solid #334155;
+      border-radius: 10px; padding: 16px; margin-top: 16px;
+    }
+    .drawer.open { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .drawer-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px;
+    }
+    @media (max-width: 768px) { .drawer-grid { grid-template-columns: 1fr; } }
+
+    .drawer-item {
+      background: #070c18; border: 1px solid var(--card-border);
+      border-radius: 6px; padding: 10px;
+    }
+    .drawer-item h4 { font-size: 12px; color: #38bdf8; margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .drawer-item p { font-size: 12px; color: #cbd5e1; }
+
+    /* Red Team / Test Mode */
+    .sample-bar {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;
+    }
+
+    /* Implementation Roadmap Checklist */
+    .checklist-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 16px; font-size: 12.5px;
+    }
+    @media (max-width: 900px) { .checklist-grid { grid-template-columns: 1fr; } }
+    .checklist-col {
+      background: #090e1a; border: 1px solid var(--card-border); border-radius: 8px; padding: 14px;
+    }
+    .checklist-col h3 { font-size: 13px; margin-bottom: 10px; color: #e2e8f0; display: flex; align-items: center; gap: 6px; }
+    .check-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .check-icon.active { color: var(--green); font-weight: bold; }
+    .check-icon.exp { color: var(--yellow); font-weight: bold; }
+    .check-icon.target { color: #38bdf8; font-weight: bold; }
+
+    /* Dropzone */
+    .dropzone {
+      border: 2px dashed var(--card-border); border-radius: 8px;
+      padding: 24px; text-align: center; cursor: pointer; background: rgba(255, 255, 255, 0.01);
+      transition: 0.2s;
+    }
+    .dropzone:hover { border-color: var(--cyan); background: rgba(6, 182, 212, 0.03); }
+    .dropzone input { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="brand-logo">VG</div>
+        <div class="brand-title">
+          <h1>VocalGuard AI V2 — Live Voice Forensics</h1>
+          <p>Creative Techies | SIH26104 — AI-Powered Voice Cloning Detection & Prevention</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <div class="status-badge" id="backendStatus">
+          <div class="status-dot" id="backendStatusDot"></div>
+          <span id="backendStatusText">Connecting Engine...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Non-Negotiable Honesty Disclaimer Banner -->
+    <div class="honesty-banner">
+      <div>
+        <strong>Forensic Integrity Notice:</strong> 
+        The synthetic score is a neural softmax probability from <code>garystafford/wav2vec2-deepfake-voice-detector</code>. Supporting LFCC, Phase, and Spectral metrics are acoustic vocoder anomaly indicators, not a trained classifier. Real telephony call termination is simulated only.
+      </div>
+      <div style="white-space: nowrap; font-size: 11px; opacity: 0.9;">Port 8080 Active</div>
+    </div>
+
+    <!-- Main Workspace Grid -->
+    <div class="grid-main">
+      <!-- Left Column: Controls & Live State Status -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <!-- Input Mode Card -->
+        <div class="card">
+          <div class="tabs">
+            <button class="tab-btn active" id="tabLive" onclick="switchTab('live')">● Live Microphone</button>
+            <button class="tab-btn" id="tabUpload" onclick="switchTab('upload')">📁 Audio File</button>
+          </div>
+
+          <!-- Live Mic Section -->
+          <div id="sectionLive" class="mic-controls">
+            <button class="btn-mic idle" id="btnMicToggle" onclick="toggleMicrophone()">
+              <span id="micBtnIcon">🎙️</span>
+              <span id="micBtnText">START LIVE STREAM</span>
+            </button>
+
+            <!-- VU Level Meter -->
+            <div class="vu-meter-row">
+              <span>MIC:</span>
+              <div class="vu-track">
+                <div class="vu-fill" id="vuFill"></div>
+              </div>
+              <span class="vu-db-text" id="vuText">-∞ dB</span>
+            </div>
+
+            <canvas id="waveformCanvas"></canvas>
+
+            <!-- Audio Configuration -->
+            <div class="config-row" style="margin-top: 6px;">
+              <span>Forensic Window:</span>
+              <select id="selectWindowMs" onchange="updateWindowConfig()">
+                <option value="250">250 ms (Ultra-fast / Research)</option>
+                <option value="500">500 ms (Fast / Low Latency)</option>
+                <option value="1000" selected>1000 ms (Standard Forensic)</option>
+                <option value="2000">2000 ms (High Acoustic Stability)</option>
+                <option value="3000">3000 ms (Deep Context)</option>
+              </select>
+            </div>
+
+            <div class="config-row">
+              <span>Auditory Buzzer:</span>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="buzzerToggle" checked /> Enable Warning Tone
+              </label>
+            </div>
+
+            <!-- Sniffer & Reset Buttons -->
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+              <button class="btn-action" style="flex: 1;" onclick="captureLiveClipAndScan()">
+                ⚡ Scan 3s Live Clip
+              </button>
+              <button class="btn-action" style="flex: 1;" onclick="resetTemporalBuffer()">
+                🔄 Reset History
+              </button>
+            </div>
+          </div>
+
+          <!-- Upload Section -->
+          <div id="sectionUpload" style="display: none;">
+            <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+              <input type="file" id="fileInput" accept=".wav,.mp3,.flac,.ogg,.m4a" onchange="handleFileSelected(this.files[0])" />
+              <div style="font-size: 26px;">📥</div>
+              <div style="font-weight: 600; margin-top: 6px; font-size: 13px;">Drop audio file here or click to browse</div>
+              <p>WAV, MP3, FLAC, OGG (16kHz mono recommended)</p>
+            </div>
+            <audio id="audioPreview" controls style="display: none; width: 100%; margin-top: 12px;"></audio>
+          </div>
+
+          <!-- Red Team / Test Mode Fixtures -->
+          <div style="margin-top: 16px; border-top: 1px solid var(--card-border); padding-top: 12px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">
+              🎯 Red Team Test Fixtures:
+            </div>
+            <div class="sample-bar">
+              <button class="btn-action" onclick="loadSampleAudio('real')">Authentic Human (.wav)</button>
+              <button class="btn-action" onclick="loadSampleAudio('synthetic')">Synthetic Clone (.wav)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5-State Status & Decision Card -->
+        <div class="card">
+          <div class="card-title">
+            <span>Forensic State & Action</span>
+            <span class="policy-pill policy-monitor" id="policyActionPill">MONITOR</span>
+          </div>
+
+          <div class="state-banner-container">
+            <!-- 5 Live States Badge -->
+            <div class="live-state-pill state-initializing" id="liveStateBadge">
+              ● INITIALIZING
+            </div>
+
+            <!-- Risk Gauge -->
+            <div class="gauge-wrapper">
+              <svg class="gauge-circle" viewBox="0 0 160 160">
+                <circle class="gauge-bg" cx="80" cy="80" r="70" />
+                <circle class="gauge-val" id="gaugeVal" cx="80" cy="80" r="70" />
+              </svg>
+              <div class="gauge-content">
+                <span class="gauge-score" id="riskNumber">0.0%</span>
+                <span class="gauge-caption" id="riskCaption">SYNTHETIC SCORE</span>
+              </div>
+            </div>
+
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px; text-align: center;" id="policyReasonText">
+              Passive listening mode. Buffering incoming audio windows.
+            </div>
+          </div>
+
+          <!-- "Why This Result?" Button -->
+          <button class="btn-action" style="width: 100%; justify-content: center; font-weight: 700;" onclick="toggleWhyDrawer()">
+            🔍 WHY THIS RESULT? (FORENSIC EXPLANATION)
+          </button>
+
+          <!-- Expandable Forensic Breakdown Drawer -->
+          <div class="drawer" id="whyDrawer">
+            <h3 style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; border-bottom: 1px solid var(--card-border); padding-bottom: 6px;">
+              Evidence Breakdown & Forensic Attribution
+            </h3>
+            <div class="drawer-grid">
+              <div class="drawer-item">
+                <h4>Signal Quality Gate <span id="whyQualityScore">--/100</span></h4>
+                <p id="whyQualityReason">Analyzing acoustic dynamic range and SNR.</p>
+              </div>
+              <div class="drawer-item">
+                <h4>Neural Softmax Prob. <span id="whyNeuralScore">--%</span></h4>
+                <p id="whyNeuralDetail">Wav2Vec2 acoustic feature representation.</p>
+              </div>
+              <div class="drawer-item">
+                <h4>Vocoder Discrepancies <span id="whyVocoderTag">ANALYZING</span></h4>
+                <p id="whyVocoderDetail">Linear Frequency Cepstral & STFT phase statistics.</p>
+              </div>
+              <div class="drawer-item">
+                <h4>Temporal Consistency <span id="whyTemporalTag">--</span></h4>
+                <p id="whyTemporalDetail">Multi-window rolling persistence ratio.</p>
+              </div>
+            </div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 10px; font-style: italic;">
+              ⚠️ Non-Negotiable Honesty: These observations represent statistical divergences from natural human speech distributions. They do not constitute certified biometric identification.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Rolling Timeline, Event Log, & Telemetry -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <!-- Live Timeline Graph Card -->
+        <div class="card">
+          <div class="timeline-header">
+            <span style="font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Live Forensic Timeline (Last 60 Seconds)</span>
+            <span style="font-family: var(--font-mono); font-size: 11px;" id="timelineStats">Windows: 0 | Cadence: 400ms</span>
+          </div>
+          <div class="timeline-container">
+            <canvas id="timelineCanvas"></canvas>
+          </div>
+
+          <!-- Event Log -->
+          <div class="card-title" style="margin-top: 10px; margin-bottom: 8px;">
+            <span>Live Forensic Event Stream</span>
+            <button class="btn-action" style="padding: 2px 8px; font-size: 11px;" onclick="clearEventLog()">Clear Log</button>
+          </div>
+          <div class="event-log-box" id="eventLogBox">
+            <div class="event-log-entry">
+              <span class="log-time">[00:00]</span>
+              <span class="log-msg info">⚡ VocalGuard AI engine ready on port 8080. Awaiting audio stream...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Forensic Features & System Telemetry Card -->
+        <div class="card">
+          <div class="card-title">
+            <span>Acoustic Features & Performance Telemetry</span>
+            <span style="font-size: 11px; color: var(--cyan);" id="telemetryDevice">DEVICE: CPU</span>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Audio Quality</div>
+              <div class="stat-val" id="statQuality" style="color: var(--green);">-- / 100</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Speech VAD Ratio</div>
+              <div class="stat-val" id="statVad">-- %</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Model Inference</div>
+              <div class="stat-val" id="statInference">-- ms</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Total Pipeline</div>
+              <div class="stat-val" id="statTotalPipeline">-- ms</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Spectral Flatness</div>
+              <div class="stat-val" id="statFlatness">--</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Spectral Centroid</div>
+              <div class="stat-val" id="statCentroid">-- Hz</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">LFCC Mean</div>
+              <div class="stat-val" id="statLfcc">--</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Phase Dispersion</div>
+              <div class="stat-val" id="statPhase">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Implementation Status Matrix Card -->
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-title">
+        <span>VocalGuard AI V2 — Implementation Status Matrix</span>
+        <span style="font-size: 11px; color: var(--text-muted);">Grounded Code Verification</span>
+      </div>
+
+      <div class="checklist-grid">
+        <div class="checklist-col">
+          <h3><span class="check-icon active">✓</span> Active & Implemented</h3>
+          <div class="check-item"><span class="check-icon active">✓</span> Real-Time 16kHz Downsampler (JS)</div>
+          <div class="check-item"><span class="check-icon active">✓</span> Zero-Queue-Lag WebSocket Streaming</div>
+          <div class="check-item"><span class="check-icon active">✓</span> In-Memory Bounded Ring Buffer</div>
+          <div class="check-item"><span class="check-icon active">✓</span> Pretrained Wav2Vec2 Classifier</div>
+          <div class="check-item"><span class="check-icon active">✓</span> Temporal Evidence Aggregator (K=8)</div>
+          <div class="check-item"><span class="check-icon active">✓</span> 5-State Hysteresis State Machine</div>
+          <div class="check-item"><span class="check-icon active">✓</span> Audio Quality Gate (RMS, SNR, Clip)</div>
+          <div class="check-item"><span class="check-icon active">✓</span> Policy Engine (ALLOW to BLOCK)</div>
+        </div>
+
+        <div class="checklist-col">
+          <h3><span class="check-icon exp">○</span> Experimental / Supporting</h3>
+          <div class="check-item"><span class="check-icon exp">○</span> 20-Filterbank LFCC Anomaly Metric</div>
+          <div class="check-item"><span class="check-icon exp">○</span> STFT Phase Dispersion & Derivative</div>
+          <div class="check-item"><span class="check-icon exp">○</span> Spectral Flatness & Centroid Shift</div>
+          <div class="check-item"><span class="check-icon exp">○</span> Pitch Jitter Dynamics Metric</div>
+          <div class="check-item"><span class="check-icon exp">○</span> ONNX Runtime Export (3.35MB)</div>
+          <div class="check-item"><span class="check-icon exp">○</span> Simulated Asterisk SIP Bridge</div>
+        </div>
+
+        <div class="checklist-col">
+          <h3><span class="check-icon target">○</span> Planned Roadmap Targets</h3>
+          <div class="check-item"><span class="check-icon target">○</span> LightCNN-29 / ResNet-18 Frontends</div>
+          <div class="check-item"><span class="check-icon target">○</span> ONNX INT8 Quantization Tuning</div>
+          <div class="check-item"><span class="check-icon target">○</span> RNNoise / Wiener Pre-filters</div>
+          <div class="check-item"><span class="check-icon target">○</span> Live Asterisk Media Proxy (ARI)</div>
+          <div class="check-item"><span class="check-icon target">○</span> ASVspoof 2021 Benchmark Eval</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Client-side Logic Script -->
+  <script>
+    // State variables
+    let audioContext = null;
+    let micStream = null;
+    let scriptProcessor = null;
+    let isRecording = false;
+    let ws = null;
+    let currentWindowMs = 1000;
+    let buzzerAudioCtx = null;
+    let sessionStartTime = Date.now();
+    let lastRenderedData = null;
+
+    // Timeline Data Storage (60 seconds history, points every ~400ms = 150 points)
+    const timelineData = [];
+    const MAX_TIMELINE_POINTS = 150;
+
+    // Setup health check
+    async function checkHealth() {
+      try {
+        const res = await fetch("/health");
+        if (res.ok) {
+          const data = await res.json();
+          const dot = document.getElementById("backendStatusDot");
+          dot.style.background = "var(--green)";
+          dot.style.boxShadow = "0 0 8px var(--green)";
+          document.getElementById("backendStatusText").innerText = `Engine Ready (${data.device.toUpperCase()})`;
+          if (data.startup_telemetry && data.startup_telemetry.warmup_ms) {
+            logEvent(`Engine warmed up in ${data.startup_telemetry.warmup_ms.toFixed(1)}ms. Model: ${data.model.split('/').pop()}`, "info");
+          }
+        }
+      } catch (e) {
+        document.getElementById("backendStatusText").innerText = "Server Offline (Check Port 8080)";
+        document.getElementById("backendStatusDot").style.background = "var(--red)";
+      }
+    }
+    checkHealth();
+
+    // Tab switcher
+    function switchTab(tab) {
+      if (tab === 'upload') {
+        document.getElementById('tabUpload').classList.add('active');
+        document.getElementById('tabLive').classList.remove('active');
+        document.getElementById('sectionUpload').style.display = 'block';
+        document.getElementById('sectionLive').style.display = 'none';
+        if (isRecording) toggleMicrophone();
+      } else {
+        document.getElementById('tabLive').classList.add('active');
+        document.getElementById('tabUpload').classList.remove('active');
+        document.getElementById('sectionLive').style.display = 'block';
+        document.getElementById('sectionUpload').style.display = 'none';
+      }
+    }
+
+    // Event Logger
+    function logEvent(msg, type = "info") {
+      const box = document.getElementById("eventLogBox");
+      const elapsedSec = Math.floor((Date.now() - sessionStartTime) / 1000);
+      const mins = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+      const secs = String(elapsedSec % 60).padStart(2, '0');
+      
+      const entry = document.createElement("div");
+      entry.className = "event-log-entry";
+      entry.innerHTML = `<span class="log-time">[${mins}:${secs}]</span><span class="log-msg ${type}">${msg}</span>`;
+      box.appendChild(entry);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function clearEventLog() {
+      document.getElementById("eventLogBox").innerHTML = '';
+      sessionStartTime = Date.now();
+      logEvent("Forensic log cleared.", "info");
+    }
+
+    // Toggle "Why This Result?" Drawer
+    function toggleWhyDrawer() {
+      const drawer = document.getElementById("whyDrawer");
+      drawer.classList.toggle("open");
+      if (drawer.classList.contains("open") && lastRenderedData) {
+        updateWhyDrawer(lastRenderedData);
+      }
+    }
+
+    function updateWhyDrawer(data) {
+      if (!data) return;
+      const q = data.quality || {};
+      const m = data.model || {};
+      const f = data.forensic_features || {};
+      const t = data.temporal || {};
+
+      document.getElementById("whyQualityScore").innerText = `${q.quality_score || 0}/100`;
+      document.getElementById("whyQualityReason").innerText = (q.reasons && q.reasons.length) ? q.reasons.join("; ") : "Dynamic vocal range verified.";
+
+      const syn = (data.synthetic_score * 100).toFixed(1);
+      document.getElementById("whyNeuralScore").innerText = `${syn}%`;
+      document.getElementById("whyNeuralDetail").innerText = `Wav2Vec2 softmax probability for synthetic speech class. Raw score: ${syn}%.`;
+
+      let vocoderText = "Nominal spectral consistency.";
+      if (f.spectral_flatness_mean > 0.05 || f.phase_diff_std > 1.8) {
+        vocoderText = "Elevated vocoder harmonic artifacts detected (LFCC / Phase phase irregularity).";
+      }
+      document.getElementById("whyVocoderTag").innerText = f.lfcc_mean ? `LFCC: ${f.lfcc_mean.toFixed(2)}` : "NOMINAL";
+      document.getElementById("whyVocoderDetail").innerText = vocoderText;
+
+      document.getElementById("whyTemporalTag").innerText = t.state || "ANALYZING";
+      document.getElementById("whyTemporalDetail").innerText = `${t.elevated_windows || 0}/${t.history_length || 0} elevated windows. Consecutive high: ${t.consecutive_elevated || 0}.`;
+    }
+
+    // Buzzer Alert Tone (Web Audio API)
+    function triggerBuzzer() {
+      if (!document.getElementById("buzzerToggle").checked) return;
+      try {
+        if (!buzzerAudioCtx) buzzerAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = buzzerAudioCtx.createOscillator();
+        const gain = buzzerAudioCtx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(880, buzzerAudioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, buzzerAudioCtx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.12, buzzerAudioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, buzzerAudioCtx.currentTime + 0.25);
+        osc.connect(gain);
+        gain.connect(buzzerAudioCtx.destination);
+        osc.start();
+        osc.stop(buzzerAudioCtx.currentTime + 0.25);
+      } catch (e) {}
+    }
+
+    // High Quality 16kHz Downsampler
+    function downsampleTo16k(inputArray, inSampleRate) {
+      if (inSampleRate === 16000) return inputArray;
+      const ratio = inSampleRate / 16000;
+      const newLength = Math.round(inputArray.length / ratio);
+      const result = new Float32Array(newLength);
+      for (let i = 0; i < newLength; i++) {
+        const start = Math.floor(i * ratio);
+        const end = Math.floor((i + 1) * ratio);
+        let sum = 0, count = 0;
+        for (let j = start; j < end && j < inputArray.length; j++) {
+          sum += inputArray[j];
+          count++;
+        }
+        result[i] = count > 0 ? (sum / count) : 0;
+      }
+      return result;
+    }
+
+    // Timeline Canvas Chart Renderer
+    function initTimelineCanvas() {
+      const canvas = document.getElementById("timelineCanvas");
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      drawTimeline();
+    }
+    window.addEventListener("resize", initTimelineCanvas);
+
+    function drawTimeline() {
+      const canvas = document.getElementById("timelineCanvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Grid background & Thresholds
+      ctx.strokeStyle = "#172338";
+      ctx.lineWidth = 1;
+      for (let y = 0.25; y <= 0.75; y += 0.25) {
+        ctx.beginPath();
+        ctx.moveTo(0, h * y);
+        ctx.lineTo(w, h * y);
+        ctx.stroke();
+      }
+
+      // Threshold line 72% (High Risk - Red Dashed)
+      const yHigh = h * (1.0 - 0.72);
+      ctx.strokeStyle = "rgba(239, 68, 68, 0.4)";
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(0, yHigh);
+      ctx.lineTo(w, yHigh);
+      ctx.stroke();
+
+      // Threshold line 50% (Suspicious - Yellow Dashed)
+      const ySusp = h * (1.0 - 0.50);
+      ctx.strokeStyle = "rgba(245, 158, 11, 0.4)";
+      ctx.beginPath();
+      ctx.moveTo(0, ySusp);
+      ctx.lineTo(w, ySusp);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Labels for thresholds
+      ctx.fillStyle = "rgba(239, 68, 68, 0.7)";
+      ctx.font = "10px monospace";
+      ctx.fillText("72% CRITICAL", 8, yHigh - 4);
+      ctx.fillStyle = "rgba(245, 158, 11, 0.7)";
+      ctx.fillText("50% SUSPICIOUS", 8, ySusp - 4);
+
+      if (timelineData.length < 2) return;
+
+      // Draw Synthetic Score Line
+      ctx.beginPath();
+      const step = w / (MAX_TIMELINE_POINTS - 1);
+      const startIdx = MAX_TIMELINE_POINTS - timelineData.length;
+
+      for (let i = 0; i < timelineData.length; i++) {
+        const val = timelineData[i];
+        const x = (startIdx + i) * step;
+        const y = h * (1.0 - val);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      ctx.strokeStyle = "#06b6d4";
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = "rgba(6, 182, 212, 0.5)";
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Draw point on latest item
+      const latestVal = timelineData[timelineData.length - 1];
+      const latestX = (startIdx + timelineData.length - 1) * step;
+      const latestY = h * (1.0 - latestVal);
+
+      ctx.beginPath();
+      ctx.arc(latestX, latestY, 5, 0, Math.PI * 2);
+      ctx.fillStyle = latestVal >= 0.72 ? "var(--red)" : (latestVal >= 0.50 ? "var(--yellow)" : "var(--green)");
+      ctx.fill();
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    function addTimelinePoint(val) {
+      timelineData.push(Math.max(0.0, Math.min(1.0, val)));
+      if (timelineData.length > MAX_TIMELINE_POINTS) timelineData.shift();
+      drawTimeline();
+    }
+
+    // Render Live Stream Result
+    function renderLiveResult(data) {
+      lastRenderedData = data;
+      const score = data.synthetic_score || 0.0;
+      const scorePct = (score * 100).toFixed(1);
+      addTimelinePoint(score);
+
+      // Update Gauge
+      document.getElementById("riskNumber").innerText = `${scorePct}%`;
+      const circumference = 440;
+      const offset = circumference - (circumference * (scorePct / 100));
+      const gaugeVal = document.getElementById("gaugeVal");
+      gaugeVal.style.strokeDashoffset = offset;
+
+      // Update 5-State Badge
+      const stateBadge = document.getElementById("liveStateBadge");
+      const st = data.status || "ANALYZING";
+      stateBadge.className = `live-state-pill state-${st.toLowerCase()}`;
+      stateBadge.innerText = `● ${st.replace('_', ' ')}`;
+
+      // Update Policy Action Pill
+      const policyPill = document.getElementById("policyActionPill");
+      const p = data.policy || { action: "MONITOR", action_label: "Monitoring" };
+      policyPill.className = `policy-pill policy-${p.action.toLowerCase()}`;
+      policyPill.innerText = p.action.replace('_', ' ');
+
+      document.getElementById("policyReasonText").innerText = p.recommended_response || p.action_label;
+
+      // Gauge Color
+      if (st === "HIGH_RISK") {
+        gaugeVal.style.stroke = "var(--red)";
+        triggerBuzzer();
+        logEvent(`🚨 HIGH RISK persistence confirmed! Score: ${scorePct}% -> Action: ${p.action}`, "alert");
+      } else if (st === "SUSPICIOUS") {
+        gaugeVal.style.stroke = "var(--orange)";
+        logEvent(`⚠️ Suspicious window observed. Score: ${scorePct}% -> Policy: ${p.action}`, "warn");
+      } else if (st === "INCONCLUSIVE") {
+        gaugeVal.style.stroke = "var(--purple)";
+        logEvent(`ℹ️ Inconclusive window: degraded audio quality.`, "warn");
+      } else {
+        gaugeVal.style.stroke = "var(--green)";
+      }
+
+      // Update Telemetry Grid
+      if (data.quality) {
+        document.getElementById("statQuality").innerText = `${data.quality.quality_score} / 100`;
+        document.getElementById("statQuality").style.color = data.quality.quality_score >= 55 ? "var(--green)" : "var(--yellow)";
+      }
+      if (data.vad) {
+        document.getElementById("statVad").innerText = `${Math.round(data.vad.speech_ratio * 100)}%`;
+      }
+      if (data.timing) {
+        document.getElementById("statInference").innerText = `${data.timing.model_inference_ms.toFixed(1)} ms`;
+        document.getElementById("statTotalPipeline").innerText = `${data.timing.total_window_analysis_ms.toFixed(1)} ms`;
+      }
+      if (data.forensic_features) {
+        const ff = data.forensic_features;
+        if (ff.spectral_flatness_mean !== undefined) document.getElementById("statFlatness").innerText = ff.spectral_flatness_mean.toFixed(4);
+        if (ff.spectral_centroid_mean_hz !== undefined) document.getElementById("statCentroid").innerText = `${Math.round(ff.spectral_centroid_mean_hz)} Hz`;
+        if (ff.lfcc_mean !== undefined) document.getElementById("statLfcc").innerText = ff.lfcc_mean.toFixed(2);
+        if (ff.phase_diff_std !== undefined) document.getElementById("statPhase").innerText = ff.phase_diff_std.toFixed(2);
+      }
+
+      // Update Performance Header
+      if (data.performance) {
+        document.getElementById("telemetryDevice").innerText = `CPU: ${data.performance.cpu_percent}% | RAM: ${data.performance.memory_rss_mb} MB`;
+      }
+
+      // If drawer is open, keep it live updated
+      if (document.getElementById("whyDrawer").classList.contains("open")) {
+        updateWhyDrawer(data);
+      }
+    }
+
+    // Toggle Microphone Live Stream
+    async function toggleMicrophone() {
+      const btn = document.getElementById("btnMicToggle");
+
+      if (isRecording) {
+        // Stop recording
+        isRecording = false;
+        btn.className = "btn-mic idle";
+        document.getElementById("micBtnIcon").innerText = "🎙️";
+        document.getElementById("micBtnText").innerText = "START LIVE STREAM";
+        document.getElementById("backendStatusDot").classList.remove("pulsing");
+
+        if (scriptProcessor) scriptProcessor.disconnect();
+        if (micStream) micStream.getTracks().forEach(t => t.stop());
+        if (audioContext && audioContext.state !== 'closed') audioContext.close();
+        if (ws) ws.close();
+
+        logEvent("Live microphone session terminated.", "info");
+      } else {
+        // Start recording
+        try {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          micStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              channelCount: 1,
+              sampleRate: 16000,
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false
+            }
+          });
+
+          // Connect WebSocket to /ws/live on port 8080
+          const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+          const wsUrl = `${proto}//${window.location.host}/ws/live?window_ms=${currentWindowMs}`;
+          ws = new WebSocket(wsUrl);
+          ws.binaryType = "arraybuffer";
+
+          ws.onopen = () => {
+            logEvent(`⚡ WebSocket connection established at /ws/live (Window: ${currentWindowMs}ms)`, "success");
+          };
+
+          ws.onmessage = (event) => {
+            try {
+              const msg = JSON.parse(event.data);
+              if (msg.type === "analysis_result") {
+                renderLiveResult(msg);
+              } else if (msg.type === "silence_gate") {
+                document.getElementById("liveStateBadge").className = "live-state-pill state-analyzing";
+                document.getElementById("liveStateBadge").innerText = "● AWAITING SPEECH";
+                document.getElementById("policyReasonText").innerText = "Low acoustic energy / Silence gate active.";
+              }
+            } catch (err) {}
+          };
+
+          ws.onerror = (e) => {
+            logEvent("WebSocket stream error occurred.", "alert");
+          };
+
+          ws.onclose = () => {
+            logEvent("WebSocket stream closed.", "info");
+          };
+
+          const source = audioContext.createMediaStreamSource(micStream);
+          const hardwareSr = audioContext.sampleRate;
+          scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+
+          const canvas = document.getElementById("waveformCanvas");
+          const ctx = canvas.getContext("2d");
+
+          scriptProcessor.onaudioprocess = (e) => {
+            if (!isRecording) return;
+            const input = e.inputBuffer.getChannelData(0);
+
+            // VU Meter Energy
+            let sumSq = 0;
+            for (let i = 0; i < input.length; i++) sumSq += input[i] * input[i];
+            const rms = Math.sqrt(sumSq / input.length);
+            const db = 20 * Math.log10(Math.max(rms, 1e-5));
+            const vuPct = Math.min(100, Math.max(0, (db + 60) * (100 / 60)));
+            document.getElementById("vuFill").style.width = `${vuPct}%`;
+            document.getElementById("vuText").innerText = `${db.toFixed(1)} dB`;
+
+            // Draw Live Waveform
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = "#06b6d4";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            const slice = canvas.width / input.length;
+            let x = 0;
+            for (let i = 0; i < input.length; i += 8) {
+              const y = ((input[i] + 1) / 2) * canvas.height;
+              if (i === 0) ctx.moveTo(x, y);
+              else ctx.lineTo(x, y);
+              x += slice * 8;
+            }
+            ctx.stroke();
+
+            // Downsample to exact 16000 Hz for server
+            const downsampled = downsampleTo16k(input, hardwareSr);
+
+            // Convert to 16-bit PCM Int16Array
+            const pcm16 = new Int16Array(downsampled.length);
+            for (let i = 0; i < downsampled.length; i++) {
+              const s = Math.max(-1, Math.min(1, downsampled[i]));
+              pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            }
+
+            // Transmit binary PCM frame over WebSocket
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              ws.send(pcm16.buffer);
+            }
+          };
+
+          source.connect(scriptProcessor);
+          scriptProcessor.connect(audioContext.destination);
+
+          isRecording = true;
+          btn.className = "btn-mic recording";
+          document.getElementById("micBtnIcon").innerText = "⏹️";
+          document.getElementById("micBtnText").innerText = "STOP LIVE STREAM";
+          document.getElementById("backendStatusDot").classList.add("pulsing");
+          logEvent(`Live stream active (Microphone input: ${hardwareSr}Hz -> 16000Hz PCM)`, "success");
+
+        } catch (err) {
+          logEvent(`Microphone access failed: ${err.message}`, "alert");
+        }
+      }
+    }
+
+    // Reset History
+    function resetTemporalBuffer() {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action: "reset" }));
+      }
+      timelineData.length = 0;
+      drawTimeline();
+      document.getElementById("liveStateBadge").className = "live-state-pill state-initializing";
+      document.getElementById("liveStateBadge").innerText = "● INITIALIZING";
+      document.getElementById("riskNumber").innerText = "0.0%";
+      document.getElementById("gaugeVal").style.strokeDashoffset = 440;
+      logEvent("Temporal evidence history cleared.", "info");
+    }
+
+    // Window Config Update
+    function updateWindowConfig() {
+      const select = document.getElementById("selectWindowMs");
+      currentWindowMs = parseInt(select.value);
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ window_ms: currentWindowMs }));
+      }
+      logEvent(`Forensic window size updated to ${currentWindowMs} ms.`, "info");
+    }
+
+    // Scan 3s Live Clip Sniffer
+    async function captureLiveClipAndScan() {
+      logEvent("Capturing 3-second live audio snippet for deep forensic scan...", "warn");
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        const chunks = [];
+        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(chunks, { type: 'audio/wav' });
+          const file = new File([blob], "live_snippet.wav", { type: "audio/wav" });
+          handleFileSelected(file);
+          stream.getTracks().forEach(t => t.stop());
+        };
+        mediaRecorder.start();
+        setTimeout(() => mediaRecorder.stop(), 3000);
+      } catch (e) {
+        logEvent(`Capture failed: ${e.message}`, "alert");
+      }
+    }
+
+    // File Upload Handler
+    async function handleFileSelected(file) {
+      if (!file) return;
+      const preview = document.getElementById("audioPreview");
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+
+      logEvent(`Processing file: ${file.name} (${(file.size / 1024).toFixed(1)} KB)...`, "info");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("/analyze", { method: "POST", body: formData });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Analysis failed");
+        }
+        const data = await res.json();
+        
+        // Adapt response to dashboard renderer
+        renderLiveResult({
+          synthetic_score: data.model.synthetic_score,
+          status: data.risk.risk_score >= 72 ? "HIGH_RISK" : (data.risk.risk_score >= 50 ? "SUSPICIOUS" : "LOW_RISK"),
+          policy: data.policy,
+          quality: data.quality,
+          forensic_features: data.forensic_features,
+          timing: {
+            model_inference_ms: data.timing.model_inference_ms,
+            total_window_analysis_ms: data.timing.total_analysis_ms
+          },
+          vad: { speech_ratio: 1.0 },
+          temporal: {
+            state: data.risk.verdict,
+            history_length: 1,
+            elevated_windows: data.risk.risk_score >= 50 ? 1 : 0,
+            consecutive_elevated: data.risk.risk_score >= 72 ? 1 : 0
+          }
+        });
+
+        logEvent(`Analysis complete: ${file.name} -> Score: ${(data.model.synthetic_score * 100).toFixed(1)}% (${data.risk.verdict})`, "success");
+
+      } catch (err) {
+        logEvent(`File analysis error: ${err.message}`, "alert");
+      }
+    }
+
+    // Load Sample Audio
+    async function loadSampleAudio(type) {
+      const url = type === 'real' ? '/audio-samples/real/sample_real_01.wav' : '/audio-samples/synthetic/sample_synthetic_01.wav';
+      try {
+        logEvent(`Loading reference sample: ${url}...`, "info");
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Sample file not found on server");
+        const blob = await res.blob();
+        const file = new File([blob], `${type}_reference.wav`, { type: "audio/wav" });
+        switchTab('upload');
+        handleFileSelected(file);
+      } catch (e) {
+        logEvent(`Could not load test sample: ${e.message}`, "alert");
+      }
+    }
+
+    // Initialize Canvas on load
+    window.addEventListener("DOMContentLoaded", () => {
+      initTimelineCanvas();
+    });
+  </script>
+</body>
+</html>

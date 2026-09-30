@@ -1,0 +1,35 @@
+# Virtual Environments
+venv/
+.env
+
+# Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs & Temporary Files
+*.log
+.DS_Store
+
+# Large Model Binaries & Weights (Never commit >100MB binaries)
+models/*.onnx
+models/*.onnx*
+models/*.data
+models/*.pt
+models/*.bin
+models/*.safetensors
+*.onnx
+*.onnx.data
+
+# Audio Files (Keep only small sample fixtures)
+*.wav
+*.flac
+*.mp3
+*.ogg
+*.m4a
+!audio_samples/real/*.wav
+!audio_samples/synthetic/*.wav

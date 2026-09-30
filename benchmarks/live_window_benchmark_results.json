@@ -1,0 +1,167 @@
+{
+  "250ms": {
+    "window_ms": 250,
+    "samples": 4000,
+    "iterations": 10,
+    "total_pipeline": {
+      "p50": 162.47,
+      "p95": 1239.85,
+      "p99": 1922.41,
+      "mean": 358.94,
+      "min": 149.56,
+      "max": 2093.05
+    },
+    "model_inference": {
+      "p50": 155.64,
+      "mean": 159.73
+    },
+    "feature_extraction": {
+      "p50": 6.13,
+      "mean": 198.62
+    },
+    "preprocessing": {
+      "p50": 0.03
+    },
+    "vad": {
+      "p50": 0.16
+    },
+    "quality": {
+      "p50": 0.18
+    },
+    "temporal_policy": {
+      "p50": 0.23
+    }
+  },
+  "500ms": {
+    "window_ms": 500,
+    "samples": 8000,
+    "iterations": 10,
+    "total_pipeline": {
+      "p50": 171.02,
+      "p95": 210.24,
+      "p99": 225.55,
+      "mean": 177.85,
+      "min": 165.39,
+      "max": 229.38
+    },
+    "model_inference": {
+      "p50": 163.1,
+      "mean": 170.13
+    },
+    "feature_extraction": {
+      "p50": 7.56,
+      "mean": 7.1
+    },
+    "preprocessing": {
+      "p50": 0.03
+    },
+    "vad": {
+      "p50": 0.2
+    },
+    "quality": {
+      "p50": 0.2
+    },
+    "temporal_policy": {
+      "p50": 0.2
+    }
+  },
+  "750ms": {
+    "window_ms": 750,
+    "samples": 12000,
+    "iterations": 10,
+    "total_pipeline": {
+      "p50": 201.91,
+      "p95": 207.0,
+      "p99": 207.93,
+      "mean": 201.87,
+      "min": 196.38,
+      "max": 208.17
+    },
+    "model_inference": {
+      "p50": 193.27,
+      "mean": 192.76
+    },
+    "feature_extraction": {
+      "p50": 8.81,
+      "mean": 8.47
+    },
+    "preprocessing": {
+      "p50": 0.04
+    },
+    "vad": {
+      "p50": 0.21
+    },
+    "quality": {
+      "p50": 0.2
+    },
+    "temporal_policy": {
+      "p50": 0.19
+    }
+  },
+  "1000ms": {
+    "window_ms": 1000,
+    "samples": 16000,
+    "iterations": 10,
+    "total_pipeline": {
+      "p50": 274.82,
+      "p95": 292.66,
+      "p99": 301.37,
+      "mean": 276.89,
+      "min": 268.06,
+      "max": 303.54
+    },
+    "model_inference": {
+      "p50": 263.36,
+      "mean": 265.55
+    },
+    "feature_extraction": {
+      "p50": 10.88,
+      "mean": 10.6
+    },
+    "preprocessing": {
+      "p50": 0.05
+    },
+    "vad": {
+      "p50": 0.23
+    },
+    "quality": {
+      "p50": 0.21
+    },
+    "temporal_policy": {
+      "p50": 0.19
+    }
+  },
+  "3000ms": {
+    "window_ms": 3000,
+    "samples": 48000,
+    "iterations": 10,
+    "total_pipeline": {
+      "p50": 729.88,
+      "p95": 778.74,
+      "p99": 788.82,
+      "mean": 737.76,
+      "min": 714.01,
+      "max": 791.34
+    },
+    "model_inference": {
+      "p50": 698.82,
+      "mean": 706.95
+    },
+    "feature_extraction": {
+      "p50": 24.69,
+      "mean": 25.4
+    },
+    "preprocessing": {
+      "p50": 0.1
+    },
+    "vad": {
+      "p50": 0.46
+    },
+    "quality": {
+      "p50": 0.34
+    },
+    "temporal_policy": {
+      "p50": 0.21
+    }
+  }
+}

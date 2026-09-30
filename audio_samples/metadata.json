@@ -1,0 +1,50 @@
+[
+  {
+    "file": "audio_samples/real/sample_real_01.wav",
+    "label": "real",
+    "speaker_id": "SPK_GEN_01",
+    "language": "en",
+    "accent": "General Indian",
+    "source_type": "harmonic_simulation",
+    "synthesis_system": "none",
+    "device": "simulated_mic",
+    "codec": "PCM_16",
+    "noise_condition": "clean"
+  },
+  {
+    "file": "audio_samples/real/sample_real_02.wav",
+    "label": "real",
+    "speaker_id": "SPK_GEN_02",
+    "language": "en",
+    "accent": "Standard American",
+    "source_type": "harmonic_simulation",
+    "synthesis_system": "none",
+    "device": "simulated_mic",
+    "codec": "PCM_16",
+    "noise_condition": "clean"
+  },
+  {
+    "file": "audio_samples/synthetic/sample_synthetic_01.wav",
+    "label": "fake",
+    "speaker_id": "SPK_SYN_01",
+    "language": "en",
+    "accent": "Synthetic Neutral",
+    "source_type": "vocoder_simulation",
+    "synthesis_system": "vocoder_buzz_gen",
+    "device": "direct_render",
+    "codec": "PCM_16",
+    "noise_condition": "clean"
+  },
+  {
+    "file": "audio_samples/synthetic/sample_synthetic_02.wav",
+    "label": "fake",
+    "speaker_id": "SPK_SYN_02",
+    "language": "en",
+    "accent": "Synthetic Neutral",
+    "source_type": "vocoder_simulation",
+    "synthesis_system": "vocoder_buzz_gen",
+    "device": "direct_render",
+    "codec": "PCM_16",
+    "noise_condition": "clean"
+  }
+]
