@@ -51,16 +51,12 @@ async def test_live_websocket():
         t = np.linspace(0, 0.1, 1600, endpoint=False)
         tone = ((0.5 * np.sin(2 * np.pi * 200 * t) + 0.3 * np.sin(2 * np.pi * 400 * t)) * 32767).astype(np.int16)
         
-        # Send 15 chunks of speech (1.5 seconds)
-        for _ in range(15):
-            await ws.send(tone.tobytes())
-            await asyncio.sleep(0.04)
-
-        # Await analysis_result
+        # Send speech chunks continuously while listening for analysis_result
         got_analysis = False
-        for _ in range(10):
+        for _ in range(40):
+            await ws.send(tone.tobytes())
             try:
-                raw_msg = await asyncio.wait_for(ws.recv(), timeout=5.0)
+                raw_msg = await asyncio.wait_for(ws.recv(), timeout=0.1)
                 eval_res = json.loads(raw_msg)
                 print(f"   Received event type: {eval_res.get('type')}")
                 if eval_res.get("type") == "analysis_result":
@@ -79,9 +75,9 @@ async def test_live_websocket():
                     got_analysis = True
                     break
             except asyncio.TimeoutError:
-                break
+                pass
 
-        assert got_analysis, "Did not receive analysis_result within timeout"
+        assert got_analysis, "Did not receive analysis_result within stream window"
         print("   [OK] Full real-time analysis pipeline verified end-to-end!")
 
         # 4. Test Reset
